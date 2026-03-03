@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GymFlow</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="logo">GF</div>
+      <div>
+        <h1>GymFlow</h1>
+        <p>Plan de entrenamiento semanal</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-ghost">Calendario</button>
+      <button class="btn">Nueva rutina</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <h2>Programas</h2>
+      <nav class="menu">
+        <a class="menu-item active" href="#">🏋️ Fuerza <span class="count">4</span></a>
+        <a class="menu-item" href="#">🏃 Cardio <span class="count">3</span></a>
+        <a class="menu-item" href="#">🧘 Movilidad <span class="count">2</span></a>
+        <a class="menu-item" href="#">🍑 Glúteo <span class="count">3</span></a>
+      </nav>
+
+      <div class="sidebar-box">
+        <h3>Intensidad</h3>
+        <div class="chips">
+          <span class="chip chip-low">Suave</span>
+          <span class="chip chip-mid">Media</span>
+          <span class="chip chip-high">Alta</span>
+        </div>
+      </div>
+    </aside>
+
+    <section class="content">
+      <div class="content-top">
+        <h2>Rutinas de hoy</h2>
+        <div class="search">
+          <input type="search" placeholder="Buscar ejercicio..." />
+        </div>
+      </div>
+
+      <div class="tasks">
+        <article class="task-card" tabindex="0">
+          <div class="task-row">
+            <div class="task-title">
+              <input class="check" type="checkbox" id="w1" />
+              <label for="w1">Sentadillas</label>
+            </div>
+            <div class="badges">
+              <span class="badge badge-cat">Pierna</span>
+              <span class="badge badge-high">Alta</span>
+              <span class="badge badge-time">4x10</span>
+            </div>
+          </div>
+          <p class="task-meta">Descanso: 90s · Técnica controlada</p>
+        </article>
+
+        <article class="task-card" tabindex="0">
+          <div class="task-row">
+            <div class="task-title">
+              <input class="check" type="checkbox" id="w2" />
+              <label for="w2">Hip Thrust</label>
+            </div>
+            <div class="badges">
+              <span class="badge badge-cat">Glúteo</span>
+              <span class="badge badge-mid">Media</span>
+              <span class="badge badge-time">4x12</span>
+            </div>
+          </div>
+          <p class="task-meta">Descanso: 60–90s · Pausa arriba 1s</p>
+        </article>
+
+        <article class="task-card" tabindex="0">
+          <div class="task-row">
+            <div class="task-title">
+              <input class="check" type="checkbox" id="w3" />
+              <label for="w3">Cinta (intervalos)</label>
+            </div>
+            <div class="badges">
+              <span class="badge badge-cat">Cardio</span>
+              <span class="badge badge-low">Suave</span>
+              <span class="badge badge-time">20 min</span>
+            </div>
+          </div>
+          <p class="task-meta">5 min rápido + 10 min suave (x3)</p>
+        </article>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
