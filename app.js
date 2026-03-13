@@ -2,132 +2,252 @@ const taskForm = document.querySelector("#taskForm");
 const taskInput = document.querySelector("#taskInput");
 const taskList = document.querySelector("#taskList");
 const searchInput = document.querySelector("input[type='search']");
-const toggleButton = document.querySelector("#themeToggle");
+const themeToggleButton = document.querySelector("#themeToggle");
+
+const filterAllButton = document.querySelector("#filterAll");
+const filterPendingButton = document.querySelector("#filterPending");
+const filterCompletedButton = document.querySelector("#filterCompleted");
 
 const STORAGE_KEY = "gymflow_tasks";
 const THEME_KEY = "gymflow_theme";
-let tasks = [];
+const MIN_TASK_LENGTH = 3;
 
-/* Guardar tareas en LocalStorage */
+let tasks = [];
+let currentFilter = "all";
+
+/**
+ * Guarda las tareas en localStorage.
+ */
 function saveTasks() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
 }
 
-/* Cargar tareas del LocalStorage */
+/**
+ * Carga las tareas guardadas desde localStorage.
+ */
 function loadTasks() {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  tasks = stored ? JSON.parse(stored) : [];
+  const savedTasks = localStorage.getItem(STORAGE_KEY);
+  tasks = savedTasks ? JSON.parse(savedTasks) : [];
 }
 
-/* Guardar tema */
+/**
+ * Guarda el tema actual en localStorage.
+ * @param {"light" | "dark"} theme
+ */
 function saveTheme(theme) {
   localStorage.setItem(THEME_KEY, theme);
 }
 
-/* Cargar tema guardado */
+/**
+ * Aplica el tema guardado al documento.
+ */
 function loadTheme() {
   const savedTheme = localStorage.getItem(THEME_KEY);
-
-  if (savedTheme === "dark") {
-    document.documentElement.classList.add("dark");
-  } else {
-    document.documentElement.classList.remove("dark");
-  }
+  const isDarkMode = savedTheme === "dark";
+  document.documentElement.classList.toggle("dark", isDarkMode);
 }
 
-/* Cambiar texto del botón según el tema */
+/**
+ * Actualiza el texto del botón del tema.
+ */
 function updateThemeButton() {
-  if (!toggleButton) return;
+  if (!themeToggleButton) return;
 
-  const isDark = document.documentElement.classList.contains("dark");
-  toggleButton.textContent = isDark ? "☀️ Modo claro" : "🌙 Modo oscuro";
+  const isDarkMode = document.documentElement.classList.contains("dark");
+  themeToggleButton.textContent = isDarkMode
+    ? "☀️ Modo claro"
+    : "🌙 Modo oscuro";
 }
 
-/* Pintar una tarea en el DOM */
-function renderTask(task) {
-  const li = document.createElement("li");
-  li.dataset.id = task.id;
-  li.className =
+/**
+ * Devuelve las tareas filtradas según el estado y la búsqueda.
+ * @returns {Array}
+ */
+function getFilteredTasks() {
+  const searchQuery = searchInput?.value.trim().toLowerCase() ?? "";
+
+  return tasks.filter((task) => {
+    const matchesFilter =
+      currentFilter === "all" ||
+      (currentFilter === "pending" && !task.completed) ||
+      (currentFilter === "completed" && task.completed);
+
+    const matchesSearch = task.text.toLowerCase().includes(searchQuery);
+
+    return matchesFilter && matchesSearch;
+  });
+}
+
+/**
+ * Elimina una tarea por su id.
+ * @param {string} taskId
+ */
+function deleteTask(taskId) {
+  tasks = tasks.filter((task) => task.id !== taskId);
+  saveTasks();
+  renderTasks();
+}
+
+/**
+ * Cambia el estado completado de una tarea.
+ * @param {string} taskId
+ * @param {boolean} isCompleted
+ */
+function toggleTaskCompletion(taskId, isCompleted) {
+  const taskToUpdate = tasks.find((task) => task.id === taskId);
+
+  if (!taskToUpdate) return;
+
+  taskToUpdate.completed = isCompleted;
+  saveTasks();
+  renderTasks();
+}
+
+/**
+ * Crea el elemento HTML de una tarea.
+ * @param {{id: string, text: string, completed: boolean}} task
+ * @returns {HTMLLIElement}
+ */
+function createTaskElement(task) {
+  const listItem = document.createElement("li");
+  listItem.dataset.id = task.id;
+  listItem.className =
     "flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900";
 
-  const span = document.createElement("span");
-  span.className = "text-slate-800 dark:text-slate-100";
-  span.textContent = task.text;
+  const leftSection = document.createElement("div");
+  leftSection.className = "flex items-center gap-3";
 
-  const deleteBtn = document.createElement("button");
-  deleteBtn.type = "button";
-  deleteBtn.className =
-    "rounded-xl border border-pink-200 px-3 py-2 text-sm font-medium text-pink-600 transition hover:bg-pink-50 dark:border-pink-400/30 dark:text-pink-300 dark:hover:bg-slate-800";
-  deleteBtn.textContent = "Eliminar";
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.checked = task.completed;
+  checkbox.className = "h-4 w-4 rounded accent-pink-500";
 
-  deleteBtn.addEventListener("click", () => {
-    tasks = tasks.filter((t) => t.id !== task.id);
-    saveTasks();
-    li.remove();
+  const taskText = document.createElement("span");
+  taskText.textContent = task.text;
+  taskText.className = task.completed
+    ? "text-slate-400 line-through dark:text-slate-500"
+    : "text-slate-800 dark:text-slate-100";
+
+  checkbox.addEventListener("change", () => {
+    toggleTaskCompletion(task.id, checkbox.checked);
   });
 
-  li.appendChild(span);
-  li.appendChild(deleteBtn);
-  taskList.appendChild(li);
+  const deleteButton = document.createElement("button");
+  deleteButton.type = "button";
+  deleteButton.className =
+    "rounded-xl border border-pink-200 px-3 py-2 text-sm font-medium text-pink-600 transition hover:bg-pink-50 dark:border-pink-400/30 dark:text-pink-300 dark:hover:bg-slate-800";
+  deleteButton.textContent = "Eliminar";
+
+  deleteButton.addEventListener("click", () => {
+    deleteTask(task.id);
+  });
+
+  leftSection.appendChild(checkbox);
+  leftSection.appendChild(taskText);
+
+  listItem.appendChild(leftSection);
+  listItem.appendChild(deleteButton);
+
+  return listItem;
 }
 
-/* Añadir tarea */
-function addTask(text) {
-  const trimmed = text.trim();
-  if (!trimmed) return;
+/**
+ * Renderiza las tareas visibles en pantalla.
+ */
+function renderTasks() {
+  if (!taskList) return;
 
-  const task = {
+  taskList.innerHTML = "";
+
+  const visibleTasks = getFilteredTasks();
+
+  visibleTasks.forEach((task) => {
+    const taskElement = createTaskElement(task);
+    taskList.appendChild(taskElement);
+  });
+}
+
+/**
+ * Valida el texto de una nueva tarea.
+ * @param {string} text
+ * @returns {boolean}
+ */
+function isValidTask(text) {
+  return text.trim().length >= MIN_TASK_LENGTH;
+}
+
+/**
+ * Añade una nueva tarea.
+ * @param {string} text
+ */
+function addTask(text) {
+  if (!isValidTask(text)) {
+    alert(`La tarea debe tener al menos ${MIN_TASK_LENGTH} caracteres.`);
+    return;
+  }
+
+  const newTask = {
     id: crypto?.randomUUID?.() ?? String(Date.now()),
-    text: trimmed,
+    text: text.trim(),
+    completed: false,
   };
 
-  tasks.push(task);
+  tasks.push(newTask);
   saveTasks();
-  renderTask(task);
+  renderTasks();
 
   taskInput.value = "";
   taskInput.focus();
 }
 
-/* Evento del formulario */
+/**
+ * Cambia el filtro actual y vuelve a renderizar.
+ * @param {"all" | "pending" | "completed"} filter
+ */
+function setFilter(filter) {
+  currentFilter = filter;
+  renderTasks();
+}
+
+/**
+ * Cambia entre modo claro y oscuro.
+ */
+function toggleTheme() {
+  document.documentElement.classList.toggle("dark");
+
+  const isDarkMode = document.documentElement.classList.contains("dark");
+  saveTheme(isDarkMode ? "dark" : "light");
+  updateThemeButton();
+}
+
 if (taskForm) {
-  taskForm.addEventListener("submit", (e) => {
-    e.preventDefault();
+  taskForm.addEventListener("submit", (event) => {
+    event.preventDefault();
     addTask(taskInput.value);
   });
 }
 
-/* Buscador */
 if (searchInput) {
-  searchInput.addEventListener("input", (e) => {
-    const query = e.target.value.toLowerCase();
-    const taskElements = document.querySelectorAll("#taskList li");
-
-    taskElements.forEach((task) => {
-      const text = task.textContent.toLowerCase();
-
-      if (text.includes(query)) {
-        task.style.display = "flex";
-      } else {
-        task.style.display = "none";
-      }
-    });
-  });
+  searchInput.addEventListener("input", renderTasks);
 }
 
-/* Botón modo oscuro */
-if (toggleButton) {
-  toggleButton.addEventListener("click", () => {
-    document.documentElement.classList.toggle("dark");
-
-    const isDark = document.documentElement.classList.contains("dark");
-    saveTheme(isDark ? "dark" : "light");
-    updateThemeButton();
-  });
+if (filterAllButton) {
+  filterAllButton.addEventListener("click", () => setFilter("all"));
 }
 
-/* Al iniciar */
+if (filterPendingButton) {
+  filterPendingButton.addEventListener("click", () => setFilter("pending"));
+}
+
+if (filterCompletedButton) {
+  filterCompletedButton.addEventListener("click", () => setFilter("completed"));
+}
+
+if (themeToggleButton) {
+  themeToggleButton.addEventListener("click", toggleTheme);
+}
+
 loadTheme();
 updateThemeButton();
 loadTasks();
-tasks.forEach(renderTask);
+renderTasks();;
