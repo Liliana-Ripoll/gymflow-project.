@@ -15,3 +15,45 @@ También utilicé la IA para probar diferentes clases de Tailwind CSS que me ayu
 
 ### Experimento 3: Mejora del código
 En algunos momentos también utilicé la IA para revisar partes del código y ver si se podían mejorar. Esto me ayudó a simplificar algunas partes y entender mejor cómo organizar el código.
+
+## Refactorización del proyecto con ayuda de IA
+
+En esta fase se utilizó inteligencia artificial para revisar el código del proyecto GymFlow y detectar posibles mejoras. El objetivo fue hacer el código más claro, más organizado y más fácil de mantener.
+
+### Mejora de funciones
+
+Se revisaron varias funciones del archivo `app.js` y se refactorizaron para mejorar su estructura y hacer el código más limpio. Algunas de las funciones que se revisaron fueron:
+
+- `loadTheme()`
+- `updateThemeButton()`
+- `getFilteredTasks()`
+- `renderTasks()`
+- `addTask()`
+
+En varios casos se simplificó la lógica de las funciones y se reorganizó el código para que fuera más fácil de entender.
+
+### Mejora de nombres de variables
+
+También se revisaron algunos nombres de variables para que fueran más claros y descriptivos. Por ejemplo:
+
+- `toggleButton` se cambió a `themeToggleButton`
+- `deleteBtn` se cambió a `deleteButton`
+- `leftSide` se cambió a `leftSection`
+
+Esto ayuda a que el código sea más fácil de leer y entender.
+
+### Validación del formulario
+
+Se añadieron validaciones adicionales al formulario de tareas. Ahora el sistema comprueba que la tarea tenga un número mínimo de caracteres y muestra un mensaje de error si el texto no es válido.
+
+### Simplificación del código
+
+Algunas partes del código se reorganizaron para evitar repetir lógica. Por ejemplo, se separó la creación del elemento de cada tarea en una función llamada `createTaskElement()`, lo que hace que la función `renderTasks()` sea más sencilla.
+
+### Comentarios en el código
+
+También se añadieron comentarios en formato JSDoc en varias funciones para explicar mejor qué hace cada una y qué parámetros utilizan.
+
+### Revisión final
+
+Aunque se utilizó IA para proponer mejoras, todo el código fue revisado manualmente antes de aplicarlo al proyecto para asegurar que funcionaba correctamente.
