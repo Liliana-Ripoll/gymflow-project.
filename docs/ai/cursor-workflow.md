@@ -38,4 +38,4 @@ Se utilizó Cursor para revisar una función JavaScript del proyecto. La herrami
 
 **Ejemplo 2: Mejora de la estructura del código**
 
-Cursor también ayudó a reorganizar algunas partes del código HTML y CSS del proyecto para que fueran más claras y fáciles de mantener.
+Cursor sugirió mejoras en el diseño utilizando clases de Tailwind CSS.
