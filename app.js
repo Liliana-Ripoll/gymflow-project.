@@ -1,5 +1,6 @@
 const taskForm = document.querySelector("#taskForm");
 const taskInput = document.querySelector("#taskInput");
+const taskError = document.querySelector("#taskError");
 const taskList = document.querySelector("#taskList");
 const searchInput = document.querySelector("input[type='search']");
 const themeToggleButton = document.querySelector("#themeToggle");
@@ -11,6 +12,7 @@ const filterCompletedButton = document.querySelector("#filterCompleted");
 const STORAGE_KEY = "gymflow_tasks";
 const THEME_KEY = "gymflow_theme";
 const MIN_TASK_LENGTH = 3;
+const MAX_TASK_LENGTH = 60;
 
 let tasks = [];
 let currentFilter = "all";
@@ -173,7 +175,20 @@ function renderTasks() {
  * @returns {boolean}
  */
 function isValidTask(text) {
-  return text.trim().length >= MIN_TASK_LENGTH;
+  const trimmedText = text.trim();
+  return (
+    trimmedText.length >= MIN_TASK_LENGTH &&
+    trimmedText.length <= MAX_TASK_LENGTH
+  );
+}
+
+/**
+ * Muestra u oculta el mensaje de error del formulario.
+ * @param {boolean} show
+ */
+function toggleTaskError(show) {
+  if (!taskError) return;
+  taskError.classList.toggle("hidden", !show);
 }
 
 /**
@@ -181,14 +196,19 @@ function isValidTask(text) {
  * @param {string} text
  */
 function addTask(text) {
-  if (!isValidTask(text)) {
-    alert(`La tarea debe tener al menos ${MIN_TASK_LENGTH} caracteres.`);
+  const trimmedText = text.trim();
+
+  if (!isValidTask(trimmedText)) {
+    toggleTaskError(true);
+    taskInput.focus();
     return;
   }
 
+  toggleTaskError(false);
+
   const newTask = {
     id: crypto?.randomUUID?.() ?? String(Date.now()),
-    text: text.trim(),
+    text: trimmedText,
     completed: false,
   };
 
@@ -231,6 +251,18 @@ if (searchInput) {
   searchInput.addEventListener("input", renderTasks);
 }
 
+if (taskInput) {
+  taskInput.addEventListener("input", () => {
+    const trimmedText = taskInput.value.trim();
+    const hasError =
+      trimmedText !== "" &&
+      (trimmedText.length < MIN_TASK_LENGTH ||
+        trimmedText.length > MAX_TASK_LENGTH);
+
+    toggleTaskError(hasError);
+  });
+}
+
 if (filterAllButton) {
   filterAllButton.addEventListener("click", () => setFilter("all"));
 }
@@ -250,4 +282,4 @@ if (themeToggleButton) {
 loadTheme();
 updateThemeButton();
 loadTasks();
-renderTasks();;
+renderTasks();
