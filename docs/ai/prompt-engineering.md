@@ -29,4 +29,4 @@ Resultado:
 Se obtuvieron sugerencias para simplificar algunas partes del código y hacerlo más organizado, lo que facilita su mantenimiento y comprensión.
 
 
-#Prompts
+# Prompts
