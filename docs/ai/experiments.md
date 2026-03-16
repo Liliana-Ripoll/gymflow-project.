@@ -102,5 +102,4 @@ Después de la instalación se realizaron varias consultas a la IA:
 La IA pudo acceder correctamente a los archivos del proyecto gracias al servidor MCP.
 
 ### Utilidad de MCP en proyectos reales
-
-El protocolo MCP permite que la IA acceda directamente al contexto del proyecto. Esto puede ser útil para analizar código, detectar errores, refactorizar funciones o entender la estructura de un proyecto. En proyectos reales ayuda a mejorar la productividad del desarrollo y facilita el trabajo con inteligencia artificial como asistente de programación.
+El protocolo MCP permite que la inteligencia artificial pueda acceder directamente a los archivos y al contexto del proyecto. Esto resulta muy útil para revisar el código, detectar posibles errores, mejorar funciones o entender mejor cómo está organizado el proyecto. En proyectos reales puede ayudar mucho a los desarrolladores, ya que permite trabajar de forma más rápida y eficiente utilizando la IA como apoyo durante la programación.
