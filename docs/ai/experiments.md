@@ -93,7 +93,7 @@ Una vez guardado el archivo se reinició Cursor para aplicar los cambios.
 
 Después de la instalación se realizaron varias consultas a la IA:
 
-- Buscar funciones largas en el archivo `app.js`
+- Buscar funciones largas en el archivo "app.js"
 - Analizar la estructura del proyecto
 - Refactorizar el código JavaScript
 - Revisar validaciones del formulario
