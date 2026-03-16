@@ -128,5 +128,19 @@ Intenté dividir las funciones manualmente para que el código fuera más fácil
 Solución con IA:
 Refactoriza el archivo app.js para que las funciones sean más pequeñas y fáciles de mantener.
 
-- Sin IA: solución funcional pero simple.
-- Con IA: búsqueda más flexible y precisa.
+La IA sugirió dividir funciones grandes y mejorar algunos nombres de variables.
+
+## Experimento 3 – Cambiar el texto de un botón
+Problema:
+Cambiar el texto de un botón cuando el usuario hace clic.
+
+Solución sin IA:
+Primero intenté hacerlo usando JavaScript y cambiando el texto del botón con textContent.
+
+Solución con IA:
+Después pedí ayuda a la IA con el siguiente prompt:¿Cómo puedo cambiar el texto de un botón cuando se hace clic usando JavaScript?
+
+La IA explicó cómo usar un eventListener para detectar el clic y cambiar el texto del botón.
+
+# Conclusión
+El uso de IA en programación puede ayudar a resolver problemas más rápido y mejorar la calidad del código. Aunque es importante entender primero el problema, la IA puede ser una herramienta útil para encontrar soluciones más eficientes.
