@@ -142,5 +142,5 @@ Después pedí ayuda a la IA con el siguiente prompt:¿Cómo puedo cambiar el te
 
 La IA explicó cómo usar un eventListener para detectar el clic y cambiar el texto del botón.
 
-# Conclusión
+### Conclusión
 El uso de IA en programación puede ayudar a resolver problemas más rápido y mejorar la calidad del código. Aunque es importante entender primero el problema, la IA puede ser una herramienta útil para encontrar soluciones más eficientes.
