@@ -103,3 +103,21 @@ La IA pudo acceder correctamente a los archivos del proyecto gracias al servidor
 
 ### Utilidad de MCP en proyectos reales
 El protocolo MCP permite que la inteligencia artificial pueda acceder directamente a los archivos y al contexto del proyecto. Esto resulta muy útil para revisar el código, detectar posibles errores, mejorar funciones o entender mejor cómo está organizado el proyecto. En proyectos reales puede ayudar mucho a los desarrolladores, ya que permite trabajar de forma más rápida y eficiente utilizando la IA como apoyo durante la programación.
+
+## Experimento 1 – Buscar tareas
+
+Problema:
+Implementar un sistema para buscar tareas dentro de la lista.
+
+Solución sin IA:
+Intenté usar el método filter() para filtrar las tareas que coincidieran con el texto introducido.
+
+Solución con IA:
+Pedí ayuda a la IA para mejorar el sistema de búsqueda.
+
+Prompt: Crea una función que permita filtrar tareas en JavaScript usando un input de búsqueda.
+La IA sugirió usar toLowerCase() para mejorar la búsqueda.
+
+Comparación
+- Sin IA: solución funcional pero simple.
+- Con IA: búsqueda más flexible y precisa.
