@@ -57,3 +57,50 @@ También se añadieron comentarios en formato JSDoc en varias funciones para exp
 ### Revisión final
 
 Aunque se utilizó IA para proponer mejoras, todo el código fue revisado manualmente antes de aplicarlo al proyecto para asegurar que funcionaba correctamente.
+
+
+
+## Conexión de servidores MCP
+
+### Instalación del servidor MCP
+
+Para permitir que la inteligencia artificial acceda al contexto del proyecto se configuró un servidor MCP en Cursor.
+
+Primero se accedió al archivo de configuración ubicado en:
+
+C:\Users\lili\.cursor\mcp.json
+
+Después se añadió un servidor MCP de tipo filesystem que permite a la IA acceder a los archivos del proyecto.
+
+Configuración utilizada:
+
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:/Users/lili/Desktop/PROYYP"
+      ]
+    }
+  }
+}
+
+Una vez guardado el archivo se reinició Cursor para aplicar los cambios.
+
+### Pruebas realizadas
+
+Después de la instalación se realizaron varias consultas a la IA:
+
+- Buscar funciones largas en el archivo `app.js`
+- Analizar la estructura del proyecto
+- Refactorizar el código JavaScript
+- Revisar validaciones del formulario
+- Detectar posibles mejoras en el código
+
+La IA pudo acceder correctamente a los archivos del proyecto gracias al servidor MCP.
+
+### Utilidad de MCP en proyectos reales
+
+El protocolo MCP permite que la IA acceda directamente al contexto del proyecto. Esto puede ser útil para analizar código, detectar errores, refactorizar funciones o entender la estructura de un proyecto. En proyectos reales ayuda a mejorar la productividad del desarrollo y facilita el trabajo con inteligencia artificial como asistente de programación.
