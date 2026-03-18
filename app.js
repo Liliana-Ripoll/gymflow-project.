@@ -24,17 +24,20 @@
   let currentFilter = "all";
 
   /**
-   * Guarda las tareas en localStorage.
+   * Guarda todas las tareas actuales en el almacenamiento local del navegador.
+   * Convierte el array de tareas a formato JSON antes de guardarlo.
    */
   function saveTasks() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   }
 
   /**
-   * Convierte JSON de forma segura.
-   * @param {string | null} value
-   * @param {Array} fallback
-   * @returns {Array}
+   * Convierte una cadena JSON a un valor JavaScript de forma segura.
+   * Si el valor no existe o el JSON es inválido, devuelve un valor por defecto.
+   *
+   * @param {string | null} value - Cadena JSON obtenida del almacenamiento.
+   * @param {Array} fallback - Valor alternativo si ocurre un error al parsear.
+   * @returns {Array} Array convertido desde JSON o el valor de respaldo.
    */
   function safeJsonParse(value, fallback) {
     if (!value) return fallback;
@@ -47,6 +50,8 @@
 
   /**
    * Carga las tareas guardadas desde localStorage.
+   * Si no existen tareas guardadas, inicializa un array vacío.
+   * También normaliza la estructura de cada tarea cargada.
    */
   function loadTasks() {
     const savedTasks = localStorage.getItem(STORAGE_KEY);
@@ -61,15 +66,17 @@
   }
 
   /**
-   * Guarda el tema actual en localStorage.
-   * @param {"light" | "dark"} theme
+   * Guarda el tema actual de la aplicación en localStorage.
+   *
+   * @param {"light" | "dark"} theme - Tema visual seleccionado.
    */
   function saveTheme(theme) {
     localStorage.setItem(THEME_KEY, theme);
   }
 
   /**
-   * Aplica el tema guardado al documento.
+   * Carga el tema guardado previamente y lo aplica al documento.
+   * Si el tema guardado es oscuro, añade la clase "dark" al elemento raíz.
    */
   function loadTheme() {
     const savedTheme = localStorage.getItem(THEME_KEY);
@@ -78,7 +85,8 @@
   }
 
   /**
-   * Actualiza el texto del botón del tema.
+   * Actualiza el texto del botón de cambio de tema según el modo activo.
+   * Muestra "Modo claro" si está activado el tema oscuro y viceversa.
    */
   function updateThemeButton() {
     if (!dom.themeToggleButton) return;
@@ -90,8 +98,10 @@
   }
 
   /**
-   * Devuelve las tareas filtradas, buscadas y ordenadas.
-   * @returns {Array}
+   * Filtra las tareas según el estado seleccionado y el texto de búsqueda.
+   * También permite ordenarlas alfabéticamente si el usuario lo indica.
+   *
+   * @returns {Array} Lista de tareas visibles tras aplicar filtro, búsqueda y ordenación.
    */
   function getFilteredTasks() {
     const searchQuery = dom.searchInput?.value.trim().toLowerCase() ?? "";
@@ -108,6 +118,7 @@
       return matchesFilter && matchesSearch;
     });
 
+    /* Ordenación de tareas alfabéticamente */
     if (sortValue === "az") {
       filteredTasks = [...filteredTasks].sort((a, b) =>
         a.text.localeCompare(b.text, "es", { sensitivity: "base" })
@@ -124,7 +135,7 @@
   }
 
   /**
-   * Actualiza el contador de tareas.
+   * Actualiza el contador visible con el número total de tareas almacenadas.
    */
   function updateTaskCounter() {
     if (!dom.taskCounter) return;
@@ -133,8 +144,10 @@
   }
 
   /**
-   * Elimina una tarea por su id.
-   * @param {string} taskId
+   * Elimina una tarea concreta a partir de su identificador.
+   * Antes de borrarla, pide confirmación al usuario.
+   *
+   * @param {string} taskId - Identificador único de la tarea a eliminar.
    */
   function deleteTask(taskId) {
     const confirmed = window.confirm("¿Seguro que quieres eliminar esta tarea?");
@@ -146,9 +159,10 @@
   }
 
   /**
-   * Cambia el estado completado de una tarea.
-   * @param {string} taskId
-   * @param {boolean} isCompleted
+   * Cambia el estado de una tarea entre completada y pendiente.
+   *
+   * @param {string} taskId - Identificador de la tarea.
+   * @param {boolean} isCompleted - Nuevo estado de la tarea.
    */
   function toggleTaskCompletion(taskId, isCompleted) {
     const taskToUpdate = tasks.find((task) => task.id === taskId);
@@ -160,8 +174,10 @@
   }
 
   /**
-   * Edita el texto de una tarea.
-   * @param {string} taskId
+   * Permite editar el texto de una tarea existente.
+   * Valida el nuevo contenido antes de guardar los cambios.
+   *
+   * @param {string} taskId - Identificador de la tarea a editar.
    */
   function editTask(taskId) {
     const taskToEdit = tasks.find((task) => task.id === taskId);
@@ -183,9 +199,10 @@
   }
 
   /**
-   * Aplica estilos al texto según el estado.
-   * @param {HTMLElement} textElement
-   * @param {boolean} isCompleted
+   * Aplica el estilo visual al texto de una tarea según esté completada o no.
+   *
+   * @param {HTMLElement} textElement - Elemento HTML que contiene el texto de la tarea.
+   * @param {boolean} isCompleted - Indica si la tarea está completada.
    */
   function applyTaskTextStyle(textElement, isCompleted) {
     textElement.className = isCompleted
@@ -194,9 +211,11 @@
   }
 
   /**
-   * Crea el elemento HTML de una tarea.
-   * @param {{id: string, text: string, completed: boolean, createdAt: string}} task
-   * @returns {HTMLLIElement}
+   * Crea y devuelve el elemento HTML completo correspondiente a una tarea.
+   * Incluye checkbox, texto, fecha de creación y botones de acción.
+   *
+   * @param {{id: string, text: string, completed: boolean, createdAt: string}} task - Objeto tarea.
+   * @returns {HTMLLIElement} Elemento de lista generado para mostrar la tarea.
    */
   function createTaskElement(task) {
     const listItem = document.createElement("li");
@@ -271,7 +290,8 @@
   }
 
   /**
-   * Renderiza las tareas visibles en pantalla.
+   * Renderiza en pantalla las tareas visibles según los filtros aplicados.
+   * Limpia la lista actual y vuelve a generar sus elementos en el DOM.
    */
   function renderTasks() {
     if (!dom.taskList) return;
@@ -290,9 +310,10 @@
   }
 
   /**
-   * Valida el texto de una tarea.
-   * @param {string} text
-   * @returns {boolean}
+   * Valida si el texto de una tarea cumple con la longitud mínima y máxima permitida.
+   *
+   * @param {string} text - Texto introducido por el usuario.
+   * @returns {boolean} Devuelve true si la tarea es válida y false si no lo es.
    */
   function isValidTask(text) {
     const trimmedText = text.trim();
@@ -303,8 +324,9 @@
   }
 
   /**
-   * Muestra u oculta el mensaje de error del formulario.
-   * @param {boolean} show
+   * Muestra u oculta el mensaje de error del formulario según corresponda.
+   *
+   * @param {boolean} show - Indica si el mensaje de error debe mostrarse.
    */
   function toggleTaskError(show) {
     if (!dom.taskError) return;
@@ -312,8 +334,10 @@
   }
 
   /**
-   * Genera un id único para cada tarea.
-   * @returns {string}
+   * Genera un identificador único para cada nueva tarea.
+   * Usa crypto.randomUUID si está disponible y, si no, crea uno alternativo.
+   *
+   * @returns {string} Identificador único de la tarea.
    */
   function generateTaskId() {
     return (
@@ -323,8 +347,10 @@
   }
 
   /**
-   * Añade una nueva tarea.
-   * @param {string} text
+   * Añade una nueva tarea al array de tareas y la guarda en localStorage.
+   * Si el texto no es válido, muestra un error y no la añade.
+   *
+   * @param {string} text - Texto de la nueva tarea.
    */
   function addTask(text) {
     const trimmedText = text.trim();
@@ -355,8 +381,9 @@
   }
 
   /**
-   * Cambia el filtro actual y vuelve a renderizar.
-   * @param {"all" | "pending" | "completed"} filter
+   * Cambia el filtro actual de visualización y vuelve a renderizar las tareas.
+   *
+   * @param {"all" | "pending" | "completed"} filter - Filtro seleccionado.
    */
   function setFilter(filter) {
     currentFilter = filter;
@@ -364,7 +391,8 @@
   }
 
   /**
-   * Cambia entre modo claro y oscuro.
+   * Alterna entre el modo claro y oscuro de la aplicación.
+   * También guarda la preferencia del usuario y actualiza el botón.
    */
   function toggleTheme() {
     document.documentElement.classList.toggle("dark");
