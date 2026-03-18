@@ -110,7 +110,9 @@
 
       return matchesFilter && matchesSearch;
     });
-
+    
+  /* Ordenación de tareas alfabéticamente */
+    
     if (sortValue === "az") {
       filteredTasks = [...filteredTasks].sort((a, b) =>
         a.text.localeCompare(b.text, "es", { sensitivity: "base" })
