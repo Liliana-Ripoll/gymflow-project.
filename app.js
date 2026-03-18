@@ -93,6 +93,9 @@
    * Devuelve las tareas filtradas, buscadas y ordenadas.
    * @returns {Array}
    */
+
+  /**     Búsqueda de tareas por texto
+  */
   function getFilteredTasks() {
     const searchQuery = dom.searchInput?.value.trim().toLowerCase() ?? "";
     const sortValue = dom.sortTasks?.value ?? "default";
