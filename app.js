@@ -110,7 +110,7 @@
 
       return matchesFilter && matchesSearch;
     });
-    
+
   /* Ordenación de tareas alfabéticamente */
     
     if (sortValue === "az") {
@@ -165,7 +165,7 @@
   }
 
   /**
-   * Edita el texto de una tarea.
+   * Funcionalidad para editar tareas 
    * @param {string} taskId
    */
   function editTask(taskId) {
