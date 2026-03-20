@@ -14,3 +14,12 @@ También me di cuenta de que la IA puede ahorrar bastante tiempo cuando estás p
 Aun así, creo que es importante revisar siempre lo que genera la IA y entender bien el código que se utiliza, porque no siempre todo funciona perfecto a la primera.
 
 En general, esta experiencia me ha ayudado a ver cómo la inteligencia artificial puede ser una herramienta muy útil dentro del desarrollo de software y cómo puede facilitar bastante el trabajo cuando se usa de forma correcta.
+
+# Reflexión sobre el uso de IA 
+Durante el desarrollo de este proyecto, la inteligencia artificial ha sido una herramienta de gran ayuda, especialmente en tareas como la mejora del README, la documentación del código con comentarios JSDoc y la resolución de dudas puntuales de programación. También ha sido útil para obtener ideas, mejorar la estructura del código y entender mejor algunos conceptos.
+
+Sin embargo, no siempre ha sido perfecta. En algunos casos, la IA ha generado código que no funcionaba correctamente o que no se adaptaba exactamente a mi proyecto, por lo que he tenido que revisarlo, corregirlo y ajustarlo manualmente. Esto me ha ayudado a entender que no se puede confiar al 100% en las respuestas y que siempre es necesario comprobar lo que se genera.
+
+Desde mi punto de vista, la IA es una herramienta útil que facilita muchas tareas, aunque creo que es importante no depender completamente de ella. 
+
+En conclusión, la IA es una herramienta que puede agilizar mucho el trabajo, pero su valor está en cómo se utiliza. Si se emplea de forma consciente y se entiende lo que se genera, puede aportar mucho al aprendizaje y al desarrollo como programadora.
