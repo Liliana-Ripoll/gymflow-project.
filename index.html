@@ -9,7 +9,7 @@
 
 <body class="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
   <!-- HEADER -->
-  <header class="sticky top-0 z-10 border-b border-slate-200/70 bg-white/70 backdrop-blur dark:border-slate-800/70 dark:bg-slate-950">
+  <header class="sticky top-0 z-10 border-b border-slate-200/70 bg-white/70 backdrop-blur dark:border-slate-800 dark:bg-slate-950">
     <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
       <div class="flex items-center gap-3">
         <div class="grid h-10 w-10 place-items-center rounded-2xl bg-pink-500 font-extrabold text-white shadow-sm">
@@ -24,14 +24,62 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
-        <button
-          type="button"
-          class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-pink-500 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800"
-        >
-          Calendario
-        </button>
+     <div class="relative">
+  <button
+    id="calendarBtn"
+    type="button"
+    class="rounded-2xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-800 shadow-sm transition hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+  >
+    Calendario
+  </button>
 
+  <div
+    id="calendarPanel"
+    class="absolute right-0 top-full z-50 mt-3 w-80 rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-700 dark:bg-slate-900"
+    style="display: none;"
+  >
+    <h3 class="mb-4 text-sm font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+      Plan semanal
+    </h3>
+
+    <div class="space-y-3">
+      <div class="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
+        <p class="text-base font-bold text-slate-900 dark:text-slate-100">Lunes</p>
+        <p class="text-sm text-slate-600 dark:text-slate-300">Descanso</p>
+      </div>
+
+      <div class="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
+        <p class="text-base font-bold text-slate-900 dark:text-slate-100">Martes</p>
+        <p class="text-sm text-slate-600 dark:text-slate-300">Cinta + glúteos y piernas</p>
+      </div>
+
+      <div class="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
+        <p class="text-base font-bold text-slate-900 dark:text-slate-100">Miércoles</p>
+        <p class="text-sm text-slate-600 dark:text-slate-300">Cinta + brazos</p>
+      </div>
+
+      <div class="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
+        <p class="text-base font-bold text-slate-900 dark:text-slate-100">Jueves</p>
+        <p class="text-sm text-slate-600 dark:text-slate-300">Elíptica</p>
+      </div>
+
+      <div class="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
+        <p class="text-base font-bold text-slate-900 dark:text-slate-100">Viernes</p>
+        <p class="text-sm text-slate-600 dark:text-slate-300">Spinning + abdomen</p>
+      </div>
+
+      <div class="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
+        <p class="text-base font-bold text-slate-900 dark:text-slate-100">Sábado</p>
+        <p class="text-sm text-slate-600 dark:text-slate-300">Spinning + sentadillas</p>
+      </div>
+
+      <div class="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
+        <p class="text-base font-bold text-slate-900 dark:text-slate-100">Domingo</p>
+        <p class="text-sm text-slate-600 dark:text-slate-300">Descanso</p>
+      </div>
+    </div>
+  </div>
+</div>
         <button
           id="themeToggle"
           type="button"
@@ -39,13 +87,6 @@
           aria-label="Cambiar tema"
         >
           🌙 Modo oscuro
-        </button>
-
-        <button
-          type="button"
-          class="rounded-xl bg-pink-500 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-pink-600 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-pink-500"
-        >
-          Nueva rutina
         </button>
       </div>
     </div>
@@ -62,7 +103,8 @@
       <nav class="grid gap-2" aria-label="Programas de entrenamiento">
         <a
           href="#"
-          class="flex items-center justify-between rounded-xl border border-pink-500/40 bg-pink-500/10 px-3 py-2 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm"
+          data-program="fuerza"
+          class="program-link flex items-center justify-between rounded-xl border border-pink-500/40 bg-pink-500/10 px-3 py-2 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm"
         >
           <span>🏋️ Fuerza</span>
           <span class="rounded-full bg-pink-500/15 px-2 py-0.5 text-xs">4</span>
@@ -70,7 +112,8 @@
 
         <a
           href="#"
-          class="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-slate-600 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-100 hover:shadow-sm dark:text-slate-300 dark:hover:bg-slate-800"
+          data-program="cardio"
+          class="program-link flex items-center justify-between rounded-xl px-3 py-2 text-sm text-slate-600 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-100 hover:shadow-sm dark:text-slate-300 dark:hover:bg-slate-800"
         >
           <span>🏃 Cardio</span>
           <span class="rounded-full bg-slate-200 px-2 py-0.5 text-xs dark:bg-slate-800">3</span>
@@ -78,7 +121,8 @@
 
         <a
           href="#"
-          class="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-slate-600 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-100 hover:shadow-sm dark:text-slate-300 dark:hover:bg-slate-800"
+          data-program="movilidad"
+          class="program-link flex items-center justify-between rounded-xl px-3 py-2 text-sm text-slate-600 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-100 hover:shadow-sm dark:text-slate-300 dark:hover:bg-slate-800"
         >
           <span>🧘 Movilidad</span>
           <span class="rounded-full bg-slate-200 px-2 py-0.5 text-xs dark:bg-slate-800">2</span>
@@ -86,9 +130,10 @@
 
         <a
           href="#"
-          class="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-slate-600 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-100 hover:shadow-sm dark:text-slate-300 dark:hover:bg-slate-800"
+          data-program="fullbody"
+          class="program-link flex items-center justify-between rounded-xl px-3 py-2 text-sm text-slate-600 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-100 hover:shadow-sm dark:text-slate-300 dark:hover:bg-slate-800"
         >
-          <span>🍑 Glúteo</span>
+          <span>🔥 Full Body</span>
           <span class="rounded-full bg-slate-200 px-2 py-0.5 text-xs dark:bg-slate-800">3</span>
         </a>
       </nav>
@@ -114,110 +159,10 @@
 
     <!-- CONTENT -->
     <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <h2 class="text-lg font-semibold">Rutinas de hoy</h2>
-
-        <div class="grid gap-3 sm:grid-cols-2 lg:w-auto">
-          <div class="w-full sm:w-72">
-            <label for="searchInput" class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
-              Buscar tarea
-            </label>
-            <input
-              id="searchInput"
-              type="search"
-              placeholder="Buscar tarea..."
-              class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm outline-none transition-all duration-200 focus:border-pink-500 focus:ring-2 focus:ring-pink-500 dark:border-slate-800 dark:bg-slate-950"
-            />
-          </div>
-
-          <div class="w-full sm:w-56">
-            <label for="sortTasks" class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
-              Ordenar tareas
-            </label>
-            <select
-              id="sortTasks"
-              class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm outline-none transition-all duration-200 focus:border-pink-500 focus:ring-2 focus:ring-pink-500 dark:border-slate-800 dark:bg-slate-950"
-            >
-              <option value="default">Orden original</option>
-              <option value="az">A-Z</option>
-              <option value="za">Z-A</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid gap-3">
-        <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm dark:border-slate-800 dark:bg-slate-950">
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex items-center gap-3">
-              <input
-                type="checkbox"
-                class="h-4 w-4 cursor-pointer accent-pink-500 transition-all duration-200 focus:ring-2 focus:ring-pink-500"
-              />
-              <p class="font-medium">Sentadillas</p>
-            </div>
-
-            <div class="flex flex-wrap gap-2 text-xs">
-              <span class="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-800">Pierna</span>
-              <span class="rounded-full border border-pink-500/40 bg-pink-500/10 px-3 py-1">Alta</span>
-              <span class="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-800">4x10</span>
-            </div>
-          </div>
-
-          <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
-            Descanso: 90s · Técnica controlada
-          </p>
-        </article>
-
-        <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm dark:border-slate-800 dark:bg-slate-950">
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex items-center gap-3">
-              <input
-                type="checkbox"
-                class="h-4 w-4 cursor-pointer accent-pink-500 transition-all duration-200 focus:ring-2 focus:ring-pink-500"
-              />
-              <p class="font-medium">Hip Thrust</p>
-            </div>
-
-            <div class="flex flex-wrap gap-2 text-xs">
-              <span class="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-800">Glúteo</span>
-              <span class="rounded-full border border-pink-500/40 bg-pink-500/10 px-3 py-1">Media</span>
-              <span class="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-800">4x12</span>
-            </div>
-          </div>
-
-          <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
-            Descanso: 60–90s · Pausa arriba 1s
-          </p>
-        </article>
-
-        <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm dark:border-slate-800 dark:bg-slate-950">
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex items-center gap-3">
-              <input
-                type="checkbox"
-                class="h-4 w-4 cursor-pointer accent-pink-500 transition-all duration-200 focus:ring-2 focus:ring-pink-500"
-              />
-              <p class="font-medium">Cinta (intervalos)</p>
-            </div>
-
-            <div class="flex flex-wrap gap-2 text-xs">
-              <span class="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-800">Cardio</span>
-              <span class="rounded-full border border-pink-500/40 bg-pink-500/10 px-3 py-1">Suave</span>
-              <span class="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-800">20 min</span>
-            </div>
-          </div>
-
-          <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
-            5 min rápido + 10 min suave (x3)
-          </p>
-        </article>
-      </div>
-
-      <!-- MIS TAREAS -->
-      <div class="mt-6">
+      <!-- PLAN DE ENTRENAMIENTO -->
+      <div>
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <h2 class="text-xl font-semibold">Mis tareas</h2>
+          <h2 class="text-xl font-semibold">Plan de entrenamiento</h2>
           <p id="taskCounter" class="text-sm text-slate-500 dark:text-slate-400">
             Total de tareas: 0
           </p>
@@ -226,7 +171,7 @@
         <form id="taskForm" class="mt-3 flex flex-col gap-3 sm:flex-row sm:items-start" novalidate>
           <div class="flex-1">
             <label for="taskInput" class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
-              Nueva tarea
+              Nueva rutina
             </label>
 
             <input
@@ -283,9 +228,74 @@
 
         <ul id="taskList" class="mt-4 grid gap-2"></ul>
       </div>
+
+      <!-- RUTINAS RECOMENDADAS -->
+      <div class="mt-8">
+        <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <h2 id="routineTitle" class="text-lg font-semibold">Rutinas de Fuerza</h2>
+
+          <div class="grid gap-3 sm:grid-cols-2 lg:w-auto">
+            <div class="w-full sm:w-72">
+              <label for="searchInput" class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+                Buscar tarea
+              </label>
+              <input
+                id="searchInput"
+                type="search"
+                placeholder="Buscar tarea..."
+                class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm outline-none transition-all duration-200 focus:border-pink-500 focus:ring-2 focus:ring-pink-500 dark:border-slate-800 dark:bg-slate-950"
+              />
+            </div>
+
+            <div class="w-full sm:w-56">
+              <label for="sortTasks" class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+                Ordenar tareas
+              </label>
+              <select
+                id="sortTasks"
+                class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm outline-none transition-all duration-200 focus:border-pink-500 focus:ring-2 focus:ring-pink-500 dark:border-slate-800 dark:bg-slate-950"
+              >
+                <option value="default">Orden original</option>
+                <option value="az">A-Z</option>
+                <option value="za">Z-A</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="routineList" class="grid gap-3"></div>
+      </div>
     </section>
   </main>
 
   <script src="./app.js" defer></script>
+
+  <script>
+  window.addEventListener("load", function () {
+    const calendarBtn = document.getElementById("calendarBtn");
+    const calendarPanel = document.getElementById("calendarPanel");
+
+    if (!calendarBtn || !calendarPanel) return;
+
+    calendarBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+
+      if (calendarPanel.style.display === "none" || calendarPanel.style.display === "") {
+        calendarPanel.style.display = "block";
+      } else {
+        calendarPanel.style.display = "none";
+      }
+    });
+
+    calendarPanel.addEventListener("click", function (e) {
+      e.stopPropagation();
+    });
+
+    document.addEventListener("click", function () {
+      calendarPanel.style.display = "none";
+    });
+  });
+  </script>
+  });
 </body>
 </html>
