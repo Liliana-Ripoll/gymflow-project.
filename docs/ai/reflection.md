@@ -22,4 +22,4 @@ Sin embargo, no siempre ha sido perfecta. En algunos casos, la IA ha generado c�
 
 Desde mi punto de vista, la IA es una herramienta útil que facilita muchas tareas, aunque creo que es importante no depender completamente de ella. 
 
-En conclusión, la IA es una herramienta que puede agilizar mucho el trabajo, pero su valor está en cómo se utiliza. Si se emplea de forma consciente y se entiende lo que se genera, puede aportar mucho al aprendizaje y al desarrollo como programadora.
+En conclusión, la IA es una herramienta que puede agilizar mucho el trabajo, pero su valor está en cómo se utiliza. Si se emplea de forma consciente y se entiende lo que se genera, puede aportar mucho al aprendizaje en el ámbito de la programación.
