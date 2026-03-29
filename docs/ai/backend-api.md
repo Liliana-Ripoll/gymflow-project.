@@ -1,4 +1,4 @@
-# Backend API – Herramientas utilizadas
+# Backend API
 ## Axios:
 Es una librería de JavaScript que permite hacer peticiones HTTP desde el navegador o desde Node.js.
 Se utiliza principalmente para comunicarse con APIs, enviando y recibiendo datos de forma sencilla (GET, POST, PUT, DELETE, etc.).
