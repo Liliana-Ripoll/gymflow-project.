@@ -1,3 +1,10 @@
+import {
+  fetchTasks as fetchTasksApi,
+  createTask as createTaskApi,
+  deleteTask as deleteTaskApi,
+  updateTask as updateTaskApi,
+} from "./api/client.js";
+
 (() => {
   const dom = {
     taskForm: document.querySelector("#taskForm"),
@@ -17,17 +24,16 @@
     calendarToggleButton: document.querySelector("#calendarToggle"),
     calendarModal: document.querySelector("#calendarModal"),
     closeCalendarButton: document.querySelector("#closeCalendar"),
-
   };
 
-  const STORAGE_KEY = "gymflow_tasks";
-  const THEME_KEY = "gymflow_theme";
   const MIN_TASK_LENGTH = 3;
   const MAX_TASK_LENGTH = 60;
 
   let tasks = [];
   let currentFilter = "all";
   let currentProgram = "fuerza";
+  let isLoading = false;
+  let networkErrorMessage = "";
 
   const routinesByProgram = {
     fuerza: [
@@ -124,39 +130,14 @@
     ],
   };
 
-  function saveTasks() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  function setLoading(value) {
+    isLoading = value;
+    renderTasks();
   }
 
-  function safeJsonParse(value, fallback) {
-    if (!value) return fallback;
-    try {
-      return JSON.parse(value);
-    } catch {
-      return fallback;
-    }
-  }
-
-  function loadTasks() {
-    const savedTasks = localStorage.getItem(STORAGE_KEY);
-    const parsedTasks = safeJsonParse(savedTasks, []);
-
-    tasks = parsedTasks.map((task) => ({
-      id: task.id,
-      text: task.text,
-      completed: Boolean(task.completed),
-      createdAt: task.createdAt || new Date().toLocaleDateString("es-ES"),
-    }));
-  }
-
-  function saveTheme(theme) {
-    localStorage.setItem(THEME_KEY, theme);
-  }
-
-  function loadTheme() {
-    const savedTheme = localStorage.getItem(THEME_KEY);
-    const isDarkMode = savedTheme === "dark";
-    document.documentElement.classList.toggle("dark", isDarkMode);
+  function setNetworkError(message = "") {
+    networkErrorMessage = message;
+    renderTasks();
   }
 
   function updateThemeButton() {
@@ -166,6 +147,15 @@
     dom.themeToggleButton.textContent = isDarkMode
       ? "☀️ Modo claro"
       : "🌙 Modo oscuro";
+  }
+
+  function loadTheme() {
+    updateThemeButton();
+  }
+
+  function toggleTheme() {
+    document.documentElement.classList.toggle("dark");
+    updateThemeButton();
   }
 
   function getFilteredTasks() {
@@ -203,25 +193,112 @@
     dom.taskCounter.textContent = `Total de tareas: ${tasks.length}`;
   }
 
-  function deleteTask(taskId) {
+  function isValidTask(text) {
+    const trimmedText = text.trim();
+    return (
+      trimmedText.length >= MIN_TASK_LENGTH &&
+      trimmedText.length <= MAX_TASK_LENGTH
+    );
+  }
+
+  function toggleTaskError(show) {
+    if (!dom.taskError) return;
+    dom.taskError.classList.toggle("hidden", !show);
+  }
+
+  async function loadTasks() {
+    try {
+      setLoading(true);
+      setNetworkError("");
+
+      const data = await fetchTasksApi();
+      tasks = data;
+
+      renderTasks();
+    } catch (error) {
+      console.error("Error al obtener tareas:", error);
+      setNetworkError("No se pudieron cargar las tareas.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function addTask(text) {
+    const trimmedText = text.trim();
+
+    if (!isValidTask(trimmedText)) {
+      toggleTaskError(true);
+      dom.taskInput?.focus();
+      return;
+    }
+
+    toggleTaskError(false);
+    setNetworkError("");
+
+    const newTask = {
+      text: trimmedText,
+      completed: false,
+      createdAt: new Date().toLocaleDateString("es-ES"),
+    };
+
+    try {
+      setLoading(true);
+      const createdTask = await createTaskApi(newTask);
+      tasks.push(createdTask);
+      renderTasks();
+
+      if (dom.taskInput) {
+        dom.taskInput.value = "";
+        dom.taskInput.focus();
+      }
+    } catch (error) {
+      console.error("Error al crear tarea:", error);
+      setNetworkError("No se pudo crear la tarea.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function removeTask(taskId) {
     const confirmed = window.confirm("¿Seguro que quieres eliminar esta tarea?");
     if (!confirmed) return;
 
-    tasks = tasks.filter((task) => task.id !== taskId);
-    saveTasks();
-    renderTasks();
+    try {
+      setLoading(true);
+      setNetworkError("");
+
+      await deleteTaskApi(taskId);
+      tasks = tasks.filter((task) => task.id !== taskId);
+      renderTasks();
+    } catch (error) {
+      console.error("Error al eliminar tarea:", error);
+      setNetworkError("No se pudo eliminar la tarea.");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  function toggleTaskCompletion(taskId, isCompleted) {
-    const taskToUpdate = tasks.find((task) => task.id === taskId);
-    if (!taskToUpdate) return;
+  async function toggleTaskCompletion(taskId, isCompleted) {
+    try {
+      setLoading(true);
+      setNetworkError("");
 
-    taskToUpdate.completed = isCompleted;
-    saveTasks();
-    renderTasks();
+      const updatedTask = await updateTaskApi(taskId, { completed: isCompleted });
+
+      tasks = tasks.map((task) =>
+        task.id === taskId ? updatedTask : task
+      );
+
+      renderTasks();
+    } catch (error) {
+      console.error("Error al actualizar tarea:", error);
+      setNetworkError("No se pudo actualizar el estado de la tarea.");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  function editTask(taskId) {
+  async function editTask(taskId) {
     const taskToEdit = tasks.find((task) => task.id === taskId);
     if (!taskToEdit) return;
 
@@ -235,9 +312,23 @@
       return;
     }
 
-    taskToEdit.text = trimmedText;
-    saveTasks();
-    renderTasks();
+    try {
+      setLoading(true);
+      setNetworkError("");
+
+      const updatedTask = await updateTaskApi(taskId, { text: trimmedText });
+
+      tasks = tasks.map((task) =>
+        task.id === taskId ? updatedTask : task
+      );
+
+      renderTasks();
+    } catch (error) {
+      console.error("Error al editar tarea:", error);
+      setNetworkError("No se pudo editar la tarea.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   function applyTaskTextStyle(textElement, isCompleted) {
@@ -263,6 +354,7 @@
     checkbox.type = "checkbox";
     checkbox.checked = task.completed;
     checkbox.className = "mt-1 h-4 w-4 rounded accent-pink-500";
+    checkbox.disabled = isLoading;
 
     const textGroup = document.createElement("div");
     textGroup.className = "flex flex-col gap-1";
@@ -293,6 +385,7 @@
     editButton.className =
       "rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800";
     editButton.textContent = "Editar";
+    editButton.disabled = isLoading;
 
     editButton.addEventListener("click", () => {
       editTask(task.id);
@@ -303,9 +396,10 @@
     deleteButton.className =
       "rounded-xl border border-pink-200 px-3 py-2 text-sm font-medium text-pink-600 transition hover:bg-pink-50 dark:border-pink-400/30 dark:text-pink-300 dark:hover:bg-slate-800";
     deleteButton.textContent = "Eliminar";
+    deleteButton.disabled = isLoading;
 
     deleteButton.addEventListener("click", () => {
-      deleteTask(task.id);
+      removeTask(task.id);
     });
 
     actions.appendChild(editButton);
@@ -395,7 +489,38 @@
     if (!dom.taskList) return;
 
     dom.taskList.innerHTML = "";
+
+    if (isLoading) {
+      const loadingItem = document.createElement("li");
+      loadingItem.className =
+        "rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300";
+      loadingItem.textContent = "Cargando tareas...";
+      dom.taskList.appendChild(loadingItem);
+      updateTaskCounter();
+      return;
+    }
+
+    if (networkErrorMessage) {
+      const errorItem = document.createElement("li");
+      errorItem.className =
+        "rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 shadow-sm dark:border-red-400/30 dark:bg-slate-900 dark:text-red-300";
+      errorItem.textContent = networkErrorMessage;
+      dom.taskList.appendChild(errorItem);
+      updateTaskCounter();
+      return;
+    }
+
     const visibleTasks = getFilteredTasks();
+
+    if (visibleTasks.length === 0) {
+      const emptyItem = document.createElement("li");
+      emptyItem.className =
+        "rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300";
+      emptyItem.textContent = "No hay tareas disponibles.";
+      dom.taskList.appendChild(emptyItem);
+      updateTaskCounter();
+      return;
+    }
 
     const fragment = document.createDocumentFragment();
 
@@ -407,83 +532,27 @@
     updateTaskCounter();
   }
 
-  function isValidTask(text) {
-    const trimmedText = text.trim();
-    return (
-      trimmedText.length >= MIN_TASK_LENGTH &&
-      trimmedText.length <= MAX_TASK_LENGTH
-    );
-  }
-
-  function toggleTaskError(show) {
-    if (!dom.taskError) return;
-    dom.taskError.classList.toggle("hidden", !show);
-  }
-
-  function generateTaskId() {
-    return (
-      crypto?.randomUUID?.() ??
-      `${Date.now()}-${Math.random().toString(16).slice(2)}`
-    );
-  }
-
-  function addTask(text) {
-    const trimmedText = text.trim();
-
-    if (!isValidTask(trimmedText)) {
-      toggleTaskError(true);
-      dom.taskInput?.focus();
-      return;
-    }
-
-    toggleTaskError(false);
-
-    const newTask = {
-      id: generateTaskId(),
-      text: trimmedText,
-      completed: false,
-      createdAt: new Date().toLocaleDateString("es-ES"),
-    };
-
-    tasks.push(newTask);
-    saveTasks();
-    renderTasks();
-
-    if (dom.taskInput) {
-      dom.taskInput.value = "";
-      dom.taskInput.focus();
-    }
-  }
-
   function setFilter(filter) {
     currentFilter = filter;
     renderTasks();
   }
 
-  function toggleTheme() {
-    document.documentElement.classList.toggle("dark");
-
-    const isDarkMode = document.documentElement.classList.contains("dark");
-    saveTheme(isDarkMode ? "dark" : "light");
-    updateThemeButton();
+  function openCalendar() {
+    if (!dom.calendarModal) return;
+    dom.calendarModal.classList.remove("hidden");
+    dom.calendarModal.classList.add("flex");
   }
 
- function openCalendar() {
-  if (!dom.calendarModal) return;
-  dom.calendarModal.classList.remove("hidden");
-  dom.calendarModal.classList.add("flex");
-}
-
-function closeCalendar() {
-  if (!dom.calendarModal) return;
-  dom.calendarModal.classList.add("hidden");
-  dom.calendarModal.classList.remove("flex");
-}
+  function closeCalendar() {
+    if (!dom.calendarModal) return;
+    dom.calendarModal.classList.add("hidden");
+    dom.calendarModal.classList.remove("flex");
+  }
 
   if (dom.taskForm) {
-    dom.taskForm.addEventListener("submit", (event) => {
+    dom.taskForm.addEventListener("submit", async (event) => {
       event.preventDefault();
-      addTask(dom.taskInput?.value ?? "");
+      await addTask(dom.taskInput?.value ?? "");
     });
   }
 
@@ -530,25 +599,23 @@ function closeCalendar() {
     });
   });
 
+  if (dom.calendarToggleButton) {
+    dom.calendarToggleButton.addEventListener("click", openCalendar);
+  }
+
+  if (dom.closeCalendarButton) {
+    dom.closeCalendarButton.addEventListener("click", closeCalendar);
+  }
+
+  if (dom.calendarModal) {
+    dom.calendarModal.addEventListener("click", (event) => {
+      if (event.target === dom.calendarModal) {
+        closeCalendar();
+      }
+    });
+  }
+
   loadTheme();
-  updateThemeButton();
-  loadTasks();
-  renderTasks();
   renderRoutines();
-
-if (dom.calendarToggleButton) {
-  dom.calendarToggleButton.addEventListener("click", openCalendar);
-}
-
-if (dom.closeCalendarButton) {
-  dom.closeCalendarButton.addEventListener("click", closeCalendar);
-}
-
-if (dom.calendarModal) {
-  dom.calendarModal.addEventListener("click", (event) => {
-    if (event.target === dom.calendarModal) {
-      closeCalendar();
-    }
-  });
-}
+  loadTasks();
 })();
