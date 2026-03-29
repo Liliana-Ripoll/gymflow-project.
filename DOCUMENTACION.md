@@ -181,3 +181,36 @@ RESPUESTA ESPERADA:
   "completed": false,
   "createdAt": "27/3/2026"
 }
+
+
+
+El frontend consume la API mediante funciones asíncronas centralizadas en api/client.js.
+### Funciones implementadas
+- fetchTasks()
+- createTask(taskData)
+- updateTask(taskId, data)
+- deleteTask(taskId)
+
+Esto permite desacoplar la lógica de red de la lógica de interfaz.
+
+Además, en la interfaz se gestionan tres estados básicos:
+
+- carga, mostrando un mensaje mientras se espera la respuesta del servidor
+- éxito, renderizando las tareas correctamente
+- error, mostrando un mensaje visual cuando la operación falla
+- 
+### Pruebas realizadas
+
+Se han realizado pruebas de integración con Thunder Client para verificar:
+- Obtención de tareas con GET
+- Creación de tareas con POST
+- Validación incorrecta con POST
+- Actualización parcial con PATCH
+- Error de validación con PATCH
+- Borrado con DELETE
+- Error 404 al borrar recursos inexistentes
+
+Estas pruebas confirmaron el correcto funcionamiento de la API y del manejo global de errores.
+
+## Conclusión
+GymFlow ha evolucionado desde una aplicación con persistencia local a una arquitectura cliente-servidor basada en una API REST. El proyecto aplica separación de responsabilidades, validación de datos en la frontera de red, manejo global de errores, variables de entorno y consumo asíncrono desde el frontend. Todo ello permite una base más sólida, mantenible y cercana a un entorno real de desarrollo backend.
