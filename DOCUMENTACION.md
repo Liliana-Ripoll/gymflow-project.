@@ -154,7 +154,7 @@ Se ha implementado un middleware global de gestión de errores. Su función es c
 La API sigue un diseño REST basado en recursos, utilizando el recurso principal:
 /api/v1/tasks
 
-# Ejemplos prácticos de uso de la API
+### Ejemplos prácticos de uso de la API
 1. Obtener tareas
    GET http://localhost:3000/api/v1/tasks
 RESPUESTA ESPERADA:
@@ -166,3 +166,18 @@ RESPUESTA ESPERADA:
     "createdAt": "27/3/2026"
   }
 ]
+
+2. Crear una tarea
+POST http://localhost:3000/api/v1/tasks
+Content-Type: application/json
+
+{
+  "text": "Hacer cardio"
+}
+RESPUESTA ESPERADA: 
+{
+  "id": "1774643319735",
+  "text": "Hacer cardio",
+  "completed": false,
+  "createdAt": "27/3/2026"
+}
