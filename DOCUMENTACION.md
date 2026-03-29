@@ -59,12 +59,12 @@ data: contiene la persistencia simulada en memoria.
 Esta organización facilita la mantenibilidad, la escalabilidad y la claridad del código.
 
 ## Tecnologías utilizadas
-# Frontend
+### Frontend
 HTML
 CSS
 Tailwind CSS
 JavaScript
-# Backend
+### Backend
 Node.js
 Express
 CORS
@@ -93,7 +93,7 @@ Abrir index.html con Live Server o en un entorno local compatible con módulos E
 
 
 ## Arquitectura backend por capas
-# 1. Capa de enrutamiento
+### 1. Capa de enrutamiento
 La capa de rutas define los endpoints de la API y delega el procesamiento a los controladores.
 
 Ejemplo:
@@ -105,7 +105,7 @@ DELETE /api/v1/tasks/:id
 
 Esta capa no contiene lógica de negocio.
 
-# 2. Capa de controladores
+### 2. Capa de controladores
 Los controladores actúan como intermediarios entre la red y la lógica interna de la aplicación. Sus funciones principales son:
 
 leer req.body y req.params
@@ -114,7 +114,7 @@ invocar a la capa de servicios
 devolver respuestas HTTP con res.json() o res.status(...).json()
 propagar errores al middleware global usando next(error)
 
-# 3. Capa de servicios
+### 3. Capa de servicios
 La capa de servicios contiene la lógica de negocio. En este proyecto:
 
 obtiene la lista de tareas
