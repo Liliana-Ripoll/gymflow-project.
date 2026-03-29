@@ -150,6 +150,19 @@ Se ha implementado un middleware global de gestión de errores. Su función es c
 - Mejora la robustez de la aplicación
 - Impide exponer detalles técnicos sensibles al cliente
 
-# API REST
-
+## API REST
 La API sigue un diseño REST basado en recursos, utilizando el recurso principal:
+/api/v1/tasks
+
+# Ejemplos prácticos de uso de la API
+1. Obtener tareas
+   GET http://localhost:3000/api/v1/tasks
+RESPUESTA ESPERADA:
+   [
+  {
+    "id": "1774643319735",
+    "text": "Ir al gym",
+    "completed": false,
+    "createdAt": "27/3/2026"
+  }
+]
