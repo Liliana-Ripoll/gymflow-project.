@@ -1,3 +1,10 @@
+import {
+  fetchTasks as fetchTasksApi,
+  createTask as createTaskApi,
+  deleteTask as deleteTaskApi,
+  updateTask as updateTaskApi,
+} from "./api/client.js";
+
 (() => {
   const dom = {
     taskForm: document.querySelector("#taskForm"),
@@ -11,83 +18,128 @@
     filterAllButton: document.querySelector("#filterAll"),
     filterPendingButton: document.querySelector("#filterPending"),
     filterCompletedButton: document.querySelector("#filterCompleted"),
+    programLinks: document.querySelectorAll(".program-link"),
+    routineTitle: document.querySelector("#routineTitle"),
+    routineList: document.querySelector("#routineList"),
+    calendarToggleButton: document.querySelector("#calendarToggle"),
+    calendarModal: document.querySelector("#calendarModal"),
+    closeCalendarButton: document.querySelector("#closeCalendar"),
   };
 
-  const STORAGE_KEY = "gymflow_tasks";
-  const THEME_KEY = "gymflow_theme";
   const MIN_TASK_LENGTH = 3;
   const MAX_TASK_LENGTH = 60;
 
-  /** @type {{ id: string, text: string, completed: boolean, createdAt: string }[]} */
   let tasks = [];
-  /** @type {"all" | "pending" | "completed"} */
   let currentFilter = "all";
+  let currentProgram = "fuerza";
+  let isLoading = false;
+  let networkErrorMessage = "";
 
-  /**
-   * Guarda todas las tareas actuales en el almacenamiento local del navegador.
-   * Convierte el array de tareas a formato JSON antes de guardarlo.
-   */
-  function saveTasks() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  const routinesByProgram = {
+    fuerza: [
+      {
+        name: "Sentadillas",
+        category: "Pierna",
+        level: "Alta",
+        detail: "4x10",
+        description: "Descanso: 90s · Técnica controlada",
+      },
+      {
+        name: "Peso muerto rumano",
+        category: "Fuerza",
+        level: "Media",
+        detail: "4x12",
+        description: "Descanso: 60–90s · Mantén espalda neutra",
+      },
+      {
+        name: "Press militar",
+        category: "Hombro",
+        level: "Media",
+        detail: "3x10",
+        description: "Descanso: 60s · Controla la bajada",
+      },
+    ],
+    cardio: [
+      {
+        name: "Cinta (intervalos)",
+        category: "Cardio",
+        level: "Suave",
+        detail: "20 min",
+        description: "5 min rápido + 10 min suave (x3)",
+      },
+      {
+        name: "Bicicleta estática",
+        category: "Cardio",
+        level: "Media",
+        detail: "25 min",
+        description: "Ritmo constante con resistencia moderada",
+      },
+      {
+        name: "Elíptica",
+        category: "Resistencia",
+        level: "Media",
+        detail: "15 min",
+        description: "Mantén un ritmo cómodo y continuo",
+      },
+    ],
+    movilidad: [
+      {
+        name: "Movilidad de cadera",
+        category: "Movilidad",
+        level: "Suave",
+        detail: "10 min",
+        description: "Aperturas y rotaciones controladas",
+      },
+      {
+        name: "Movilidad de hombros",
+        category: "Movilidad",
+        level: "Suave",
+        detail: "8 min",
+        description: "Círculos y estiramientos suaves",
+      },
+      {
+        name: "Estiramiento de espalda",
+        category: "Recuperación",
+        level: "Suave",
+        detail: "12 min",
+        description: "Respiración profunda y control postural",
+      },
+    ],
+    fullbody: [
+      {
+        name: "Burpees",
+        category: "Full Body",
+        level: "Alta",
+        detail: "3x12",
+        description: "Explosividad y control del ritmo",
+      },
+      {
+        name: "Zancadas con mancuernas",
+        category: "Full Body",
+        level: "Media",
+        detail: "3x10",
+        description: "Alterna pierna derecha e izquierda",
+      },
+      {
+        name: "Plancha con toque de hombro",
+        category: "Core",
+        level: "Media",
+        detail: "3x30s",
+        description: "Activa abdomen y evita balanceo",
+      },
+    ],
+  };
+
+  function setLoading(value) {
+    isLoading = value;
+    renderTasks();
   }
 
-  /**
-   * Convierte una cadena JSON a un valor JavaScript de forma segura.
-   * Si el valor no existe o el JSON es inválido, devuelve un valor por defecto.
-   *
-   * @param {string | null} value - Cadena JSON obtenida del almacenamiento.
-   * @param {Array} fallback - Valor alternativo si ocurre un error al parsear.
-   * @returns {Array} Array convertido desde JSON o el valor de respaldo.
-   */
-  function safeJsonParse(value, fallback) {
-    if (!value) return fallback;
-    try {
-      return JSON.parse(value);
-    } catch {
-      return fallback;
-    }
+  function setNetworkError(message = "") {
+    networkErrorMessage = message;
+    renderTasks();
   }
 
-  /**
-   * Carga las tareas guardadas desde localStorage.
-   * Si no existen tareas guardadas, inicializa un array vacío.
-   * También normaliza la estructura de cada tarea cargada.
-   */
-  function loadTasks() {
-    const savedTasks = localStorage.getItem(STORAGE_KEY);
-    const parsedTasks = safeJsonParse(savedTasks, []);
-
-    tasks = parsedTasks.map((task) => ({
-      id: task.id,
-      text: task.text,
-      completed: Boolean(task.completed),
-      createdAt: task.createdAt || new Date().toLocaleDateString("es-ES"),
-    }));
-  }
-
-  /**
-   * Guarda el tema actual de la aplicación en localStorage.
-   *
-   * @param {"light" | "dark"} theme - Tema visual seleccionado.
-   */
-  function saveTheme(theme) {
-    localStorage.setItem(THEME_KEY, theme);
-  }
-
-  /**
-   * Carga el tema guardado previamente y lo aplica al documento.
-   * Si el tema guardado es oscuro, añade la clase "dark" al elemento raíz.
-   */
-  function loadTheme() {
-    const savedTheme = localStorage.getItem(THEME_KEY);
-    const isDarkMode = savedTheme === "dark";
-    document.documentElement.classList.toggle("dark", isDarkMode);
-  }
-
-  /**
-   * Actualiza el texto del botón de cambio de tema según el modo activo.
-   * Muestra "Modo claro" si está activado el tema oscuro y viceversa.
-   */
   function updateThemeButton() {
     if (!dom.themeToggleButton) return;
 
@@ -97,12 +149,15 @@
       : "🌙 Modo oscuro";
   }
 
-  /**
-   * Filtra las tareas según el estado seleccionado y el texto de búsqueda.
-   * También permite ordenarlas alfabéticamente si el usuario lo indica.
-   *
-   * @returns {Array} Lista de tareas visibles tras aplicar filtro, búsqueda y ordenación.
-   */
+  function loadTheme() {
+    updateThemeButton();
+  }
+
+  function toggleTheme() {
+    document.documentElement.classList.toggle("dark");
+    updateThemeButton();
+  }
+
   function getFilteredTasks() {
     const searchQuery = dom.searchInput?.value.trim().toLowerCase() ?? "";
     const sortValue = dom.sortTasks?.value ?? "default";
@@ -118,7 +173,6 @@
       return matchesFilter && matchesSearch;
     });
 
-    /* Ordenación de tareas alfabéticamente */
     if (sortValue === "az") {
       filteredTasks = [...filteredTasks].sort((a, b) =>
         a.text.localeCompare(b.text, "es", { sensitivity: "base" })
@@ -134,52 +188,117 @@
     return filteredTasks;
   }
 
-  /**
-   * Actualiza el contador visible con el número total de tareas almacenadas.
-   */
   function updateTaskCounter() {
     if (!dom.taskCounter) return;
-
     dom.taskCounter.textContent = `Total de tareas: ${tasks.length}`;
   }
 
-  /**
-   * Elimina una tarea concreta a partir de su identificador.
-   * Antes de borrarla, pide confirmación al usuario.
-   *
-   * @param {string} taskId - Identificador único de la tarea a eliminar.
-   */
-  function deleteTask(taskId) {
+  function isValidTask(text) {
+    const trimmedText = text.trim();
+    return (
+      trimmedText.length >= MIN_TASK_LENGTH &&
+      trimmedText.length <= MAX_TASK_LENGTH
+    );
+  }
+
+  function toggleTaskError(show) {
+    if (!dom.taskError) return;
+    dom.taskError.classList.toggle("hidden", !show);
+  }
+
+  async function loadTasks() {
+    try {
+      setLoading(true);
+      setNetworkError("");
+
+      const data = await fetchTasksApi();
+      tasks = data;
+
+      renderTasks();
+    } catch (error) {
+      console.error("Error al obtener tareas:", error);
+      setNetworkError("No se pudieron cargar las tareas.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function addTask(text) {
+    const trimmedText = text.trim();
+
+    if (!isValidTask(trimmedText)) {
+      toggleTaskError(true);
+      dom.taskInput?.focus();
+      return;
+    }
+
+    toggleTaskError(false);
+    setNetworkError("");
+
+    const newTask = {
+      text: trimmedText,
+      completed: false,
+      createdAt: new Date().toLocaleDateString("es-ES"),
+    };
+
+    try {
+      setLoading(true);
+      const createdTask = await createTaskApi(newTask);
+      tasks.push(createdTask);
+      renderTasks();
+
+      if (dom.taskInput) {
+        dom.taskInput.value = "";
+        dom.taskInput.focus();
+      }
+    } catch (error) {
+      console.error("Error al crear tarea:", error);
+      setNetworkError("No se pudo crear la tarea.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function removeTask(taskId) {
     const confirmed = window.confirm("¿Seguro que quieres eliminar esta tarea?");
     if (!confirmed) return;
 
-    tasks = tasks.filter((task) => task.id !== taskId);
-    saveTasks();
-    renderTasks();
+    try {
+      setLoading(true);
+      setNetworkError("");
+
+      await deleteTaskApi(taskId);
+      tasks = tasks.filter((task) => task.id !== taskId);
+      renderTasks();
+    } catch (error) {
+      console.error("Error al eliminar tarea:", error);
+      setNetworkError("No se pudo eliminar la tarea.");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  /**
-   * Cambia el estado de una tarea entre completada y pendiente.
-   *
-   * @param {string} taskId - Identificador de la tarea.
-   * @param {boolean} isCompleted - Nuevo estado de la tarea.
-   */
-  function toggleTaskCompletion(taskId, isCompleted) {
-    const taskToUpdate = tasks.find((task) => task.id === taskId);
-    if (!taskToUpdate) return;
+  async function toggleTaskCompletion(taskId, isCompleted) {
+    try {
+      setLoading(true);
+      setNetworkError("");
 
-    taskToUpdate.completed = isCompleted;
-    saveTasks();
-    renderTasks();
+      const updatedTask = await updateTaskApi(taskId, { completed: isCompleted });
+
+      tasks = tasks.map((task) =>
+        task.id === taskId ? updatedTask : task
+      );
+
+      renderTasks();
+    } catch (error) {
+      console.error("Error al actualizar tarea:", error);
+      setNetworkError("No se pudo actualizar el estado de la tarea.");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  /**
-   * Permite editar el texto de una tarea existente.
-   * Valida el nuevo contenido antes de guardar los cambios.
-   *
-   * @param {string} taskId - Identificador de la tarea a editar.
-   */
-  function editTask(taskId) {
+  async function editTask(taskId) {
     const taskToEdit = tasks.find((task) => task.id === taskId);
     if (!taskToEdit) return;
 
@@ -193,30 +312,31 @@
       return;
     }
 
-    taskToEdit.text = trimmedText;
-    saveTasks();
-    renderTasks();
+    try {
+      setLoading(true);
+      setNetworkError("");
+
+      const updatedTask = await updateTaskApi(taskId, { text: trimmedText });
+
+      tasks = tasks.map((task) =>
+        task.id === taskId ? updatedTask : task
+      );
+
+      renderTasks();
+    } catch (error) {
+      console.error("Error al editar tarea:", error);
+      setNetworkError("No se pudo editar la tarea.");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  /**
-   * Aplica el estilo visual al texto de una tarea según esté completada o no.
-   *
-   * @param {HTMLElement} textElement - Elemento HTML que contiene el texto de la tarea.
-   * @param {boolean} isCompleted - Indica si la tarea está completada.
-   */
   function applyTaskTextStyle(textElement, isCompleted) {
     textElement.className = isCompleted
       ? "font-medium text-slate-400 line-through dark:text-slate-500"
       : "font-medium text-slate-800 dark:text-slate-100";
   }
 
-  /**
-   * Crea y devuelve el elemento HTML completo correspondiente a una tarea.
-   * Incluye checkbox, texto, fecha de creación y botones de acción.
-   *
-   * @param {{id: string, text: string, completed: boolean, createdAt: string}} task - Objeto tarea.
-   * @returns {HTMLLIElement} Elemento de lista generado para mostrar la tarea.
-   */
   function createTaskElement(task) {
     const listItem = document.createElement("li");
     listItem.dataset.id = task.id;
@@ -234,6 +354,7 @@
     checkbox.type = "checkbox";
     checkbox.checked = task.completed;
     checkbox.className = "mt-1 h-4 w-4 rounded accent-pink-500";
+    checkbox.disabled = isLoading;
 
     const textGroup = document.createElement("div");
     textGroup.className = "flex flex-col gap-1";
@@ -264,6 +385,7 @@
     editButton.className =
       "rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800";
     editButton.textContent = "Editar";
+    editButton.disabled = isLoading;
 
     editButton.addEventListener("click", () => {
       editTask(task.id);
@@ -274,9 +396,10 @@
     deleteButton.className =
       "rounded-xl border border-pink-200 px-3 py-2 text-sm font-medium text-pink-600 transition hover:bg-pink-50 dark:border-pink-400/30 dark:text-pink-300 dark:hover:bg-slate-800";
     deleteButton.textContent = "Eliminar";
+    deleteButton.disabled = isLoading;
 
     deleteButton.addEventListener("click", () => {
-      deleteTask(task.id);
+      removeTask(task.id);
     });
 
     actions.appendChild(editButton);
@@ -289,15 +412,115 @@
     return listItem;
   }
 
-  /**
-   * Renderiza en pantalla las tareas visibles según los filtros aplicados.
-   * Limpia la lista actual y vuelve a generar sus elementos en el DOM.
-   */
+  function createRoutineElement(routine) {
+    const article = document.createElement("article");
+    article.className =
+      "rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm dark:border-slate-800 dark:bg-slate-950";
+
+    article.innerHTML = `
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex items-center gap-3">
+          <input
+            type="checkbox"
+            class="h-4 w-4 cursor-pointer accent-pink-500 transition-all duration-200 focus:ring-2 focus:ring-pink-500"
+          />
+          <p class="font-medium">${routine.name}</p>
+        </div>
+
+        <div class="flex flex-wrap gap-2 text-xs">
+          <span class="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-800">${routine.category}</span>
+          <span class="rounded-full border border-pink-500/40 bg-pink-500/10 px-3 py-1">${routine.level}</span>
+          <span class="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-800">${routine.detail}</span>
+        </div>
+      </div>
+
+      <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+        ${routine.description}
+      </p>
+    `;
+
+    return article;
+  }
+
+  function renderRoutines() {
+    if (!dom.routineList || !dom.routineTitle) return;
+
+    const routines = routinesByProgram[currentProgram] ?? [];
+    const titles = {
+      fuerza: "Rutinas de Fuerza",
+      cardio: "Rutinas de Cardio",
+      movilidad: "Rutinas de Movilidad",
+      fullbody: "Rutinas de Full Body",
+    };
+
+    dom.routineTitle.textContent = titles[currentProgram];
+    dom.routineList.innerHTML = "";
+
+    const fragment = document.createDocumentFragment();
+
+    routines.forEach((routine) => {
+      fragment.appendChild(createRoutineElement(routine));
+    });
+
+    dom.routineList.appendChild(fragment);
+  }
+
+  function updateActiveProgram(selectedProgram) {
+    dom.programLinks.forEach((link) => {
+      const isActive = link.dataset.program === selectedProgram;
+
+      if (isActive) {
+        link.className =
+          "program-link flex items-center justify-between rounded-xl border border-pink-500/40 bg-pink-500/10 px-3 py-2 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm";
+      } else {
+        link.className =
+          "program-link flex items-center justify-between rounded-xl px-3 py-2 text-sm text-slate-600 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-100 hover:shadow-sm dark:text-slate-300 dark:hover:bg-slate-800";
+      }
+    });
+  }
+
+  function setProgram(program) {
+    currentProgram = program;
+    updateActiveProgram(program);
+    renderRoutines();
+  }
+
   function renderTasks() {
     if (!dom.taskList) return;
 
     dom.taskList.innerHTML = "";
+
+    if (isLoading) {
+      const loadingItem = document.createElement("li");
+      loadingItem.className =
+        "rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300";
+      loadingItem.textContent = "Cargando tareas...";
+      dom.taskList.appendChild(loadingItem);
+      updateTaskCounter();
+      return;
+    }
+
+    if (networkErrorMessage) {
+      const errorItem = document.createElement("li");
+      errorItem.className =
+        "rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 shadow-sm dark:border-red-400/30 dark:bg-slate-900 dark:text-red-300";
+      errorItem.textContent = networkErrorMessage;
+      dom.taskList.appendChild(errorItem);
+      updateTaskCounter();
+      return;
+    }
+
     const visibleTasks = getFilteredTasks();
+
+    if (visibleTasks.length === 0) {
+      const emptyItem = document.createElement("li");
+      emptyItem.className =
+        "rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300";
+      emptyItem.textContent = "No hay tareas disponibles.";
+      dom.taskList.appendChild(emptyItem);
+      updateTaskCounter();
+      return;
+    }
 
     const fragment = document.createDocumentFragment();
 
@@ -309,103 +532,27 @@
     updateTaskCounter();
   }
 
-  /**
-   * Valida si el texto de una tarea cumple con la longitud mínima y máxima permitida.
-   *
-   * @param {string} text - Texto introducido por el usuario.
-   * @returns {boolean} Devuelve true si la tarea es válida y false si no lo es.
-   */
-  function isValidTask(text) {
-    const trimmedText = text.trim();
-    return (
-      trimmedText.length >= MIN_TASK_LENGTH &&
-      trimmedText.length <= MAX_TASK_LENGTH
-    );
-  }
-
-  /**
-   * Muestra u oculta el mensaje de error del formulario según corresponda.
-   *
-   * @param {boolean} show - Indica si el mensaje de error debe mostrarse.
-   */
-  function toggleTaskError(show) {
-    if (!dom.taskError) return;
-    dom.taskError.classList.toggle("hidden", !show);
-  }
-
-  /**
-   * Genera un identificador único para cada nueva tarea.
-   * Usa crypto.randomUUID si está disponible y, si no, crea uno alternativo.
-   *
-   * @returns {string} Identificador único de la tarea.
-   */
-  function generateTaskId() {
-    return (
-      crypto?.randomUUID?.() ??
-      `${Date.now()}-${Math.random().toString(16).slice(2)}`
-    );
-  }
-
-  /**
-   * Añade una nueva tarea al array de tareas y la guarda en localStorage.
-   * Si el texto no es válido, muestra un error y no la añade.
-   *
-   * @param {string} text - Texto de la nueva tarea.
-   */
-  function addTask(text) {
-    const trimmedText = text.trim();
-
-    if (!isValidTask(trimmedText)) {
-      toggleTaskError(true);
-      dom.taskInput?.focus();
-      return;
-    }
-
-    toggleTaskError(false);
-
-    const newTask = {
-      id: generateTaskId(),
-      text: trimmedText,
-      completed: false,
-      createdAt: new Date().toLocaleDateString("es-ES"),
-    };
-
-    tasks.push(newTask);
-    saveTasks();
-    renderTasks();
-
-    if (dom.taskInput) {
-      dom.taskInput.value = "";
-      dom.taskInput.focus();
-    }
-  }
-
-  /**
-   * Cambia el filtro actual de visualización y vuelve a renderizar las tareas.
-   *
-   * @param {"all" | "pending" | "completed"} filter - Filtro seleccionado.
-   */
   function setFilter(filter) {
     currentFilter = filter;
     renderTasks();
   }
 
-  /**
-   * Alterna entre el modo claro y oscuro de la aplicación.
-   * También guarda la preferencia del usuario y actualiza el botón.
-   */
-  function toggleTheme() {
-    document.documentElement.classList.toggle("dark");
+  function openCalendar() {
+    if (!dom.calendarModal) return;
+    dom.calendarModal.classList.remove("hidden");
+    dom.calendarModal.classList.add("flex");
+  }
 
-    const isDarkMode = document.documentElement.classList.contains("dark");
-    saveTheme(isDarkMode ? "dark" : "light");
-    updateThemeButton();
+  function closeCalendar() {
+    if (!dom.calendarModal) return;
+    dom.calendarModal.classList.add("hidden");
+    dom.calendarModal.classList.remove("flex");
   }
 
   if (dom.taskForm) {
-    dom.taskForm.addEventListener("submit", (event) => {
+    dom.taskForm.addEventListener("submit", async (event) => {
       event.preventDefault();
-      addTask(dom.taskInput?.value ?? "");
+      await addTask(dom.taskInput?.value ?? "");
     });
   }
 
@@ -444,8 +591,31 @@
     dom.themeToggleButton.addEventListener("click", toggleTheme);
   }
 
+  dom.programLinks.forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      const selectedProgram = link.dataset.program;
+      setProgram(selectedProgram);
+    });
+  });
+
+  if (dom.calendarToggleButton) {
+    dom.calendarToggleButton.addEventListener("click", openCalendar);
+  }
+
+  if (dom.closeCalendarButton) {
+    dom.closeCalendarButton.addEventListener("click", closeCalendar);
+  }
+
+  if (dom.calendarModal) {
+    dom.calendarModal.addEventListener("click", (event) => {
+      if (event.target === dom.calendarModal) {
+        closeCalendar();
+      }
+    });
+  }
+
   loadTheme();
-  updateThemeButton();
+  renderRoutines();
   loadTasks();
-  renderTasks();
 })();
