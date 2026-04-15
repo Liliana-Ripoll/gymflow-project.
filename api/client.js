@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/api/v1/tasks";
+const API_URL = "https://gymflow-project.onrender.com/api/v1/tasks";
 
 export async function fetchTasks() {
   const response = await fetch(API_URL);
